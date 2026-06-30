@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>CSTM — Customer Service Team Member</title>
+<meta name="description" content="Penilaian 7 Langkah Pelayanan & Double Check Order untuk tim customer service." />
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="CSTM" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="icons/favicon-64.png" />
+
+<style>
+  /* Self-hosted so the PWA looks right fully offline */
+  @font-face{
+    font-family:"Lilita One";
+    src:url("fonts/LilitaOne-Regular.woff2") format("woff2");
+    font-weight:400;font-style:normal;font-display:swap;
+  }
+  @font-face{
+    font-family:"Fredoka";
+    src:url("fonts/Fredoka-VF.woff2") format("woff2");
+    font-weight:300 700;font-style:normal;font-display:swap;
+  }
+
+  :root{
+    --white:#ffffff;
+    --yellow:#ffc542;
+    --orange:#ff5f1f;
+    --red:#fc3134;
+    --black:#000000;
+
+    --ink:#0a0a0a;
+    --display:"Lilita One", system-ui, sans-serif;
+    --body:"Fredoka", system-ui, sans-serif;
+
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:var(--body);
+    color:var(--ink);
+    background:var(--white);
+    overflow:hidden;
+    /* keeps the layout from being yanked around by mobile address bars */
+    height:100dvh;
+  }
+
+  /* ---- Stage ---- */
+  .stage{
+    position:relative;
+    height:100%;
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+    display:grid;
+    grid-template-rows:1.15fr auto 1fr;
+    align-items:center;
+    padding:calc(var(--safe-top) + 24px) 28px calc(var(--safe-bottom) + 40px);
+  }
+
+  /* ---- Warm signature glow behind the logo ---- */
+  .glow{
+    position:absolute;
+    top:42%;
+    left:50%;
+    width:min(78vw,420px);
+    aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    background:
+      radial-gradient(closest-side,
+        rgba(255,197,66,.34),
+        rgba(255,95,31,.18) 46%,
+        rgba(252,49,52,.07) 68%,
+        transparent 74%);
+    filter:blur(2px);
+    z-index:0;
+    pointer-events:none;
+    animation:breathe 7s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.92;}
+    50%{transform:translate(-50%,-50%) scale(1.06);opacity:1;}
+  }
+
+  /* ---- Brand block ---- */
+  .brand{
+    grid-row:2;
+    position:relative;
+    z-index:1;
+    text-align:center;
+  }
+
+  .logo{
+    font-family:var(--display);
+    color:var(--black);
+    font-weight:400;
+    font-size:clamp(72px,22vw,128px);
+    line-height:.9;
+    letter-spacing:.01em;
+    margin:0;
+    display:inline-flex;
+    gap:.04em;
+  }
+  /* hand-lettered bounce: each glyph sits a touch off-baseline & off-angle */
+  .logo span{display:inline-block;transform-origin:center bottom;}
+  .logo .c{transform:rotate(-5deg) translateY(2px);}
+  .logo .s{transform:rotate(3deg)  translateY(-3px);}
+  .logo .t{transform:rotate(-2deg) translateY(1px);}
+  .logo .m{transform:rotate(4deg)  translateY(-2px);}
+
+  .tagline{
+    font-family:var(--display);
+    font-size:clamp(13px,3.7vw,17px);
+    letter-spacing:.04em;
+    color:var(--black);
+    margin:10px 0 0;
+    opacity:.92;
+  }
+
+  /* ---- Start button ---- */
+  .start-wrap{
+    grid-row:3;
+    align-self:end;
+    display:flex;
+    justify-content:center;
+    z-index:1;
+  }
+  .start{
+    position:relative;
+    isolation:isolate;
+    font-family:var(--display);
+    font-size:clamp(20px,5.6vw,26px);
+    letter-spacing:.03em;
+    color:var(--white);
+    background:var(--black);
+    border:none;
+    border-radius:999px;
+    padding:16px 56px;
+    min-width:200px;
+    cursor:pointer;
+    overflow:hidden;
+    box-shadow:0 10px 24px rgba(0,0,0,.18);
+    transition:transform .14s ease, box-shadow .2s ease;
+  }
+  /* warm palette fill that sweeps up on hover / press */
+  .start::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    background:linear-gradient(120deg,var(--yellow),var(--orange) 52%,var(--red));
+    transform:translateY(101%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  .start span{position:relative;z-index:1;}
+  @media (hover:hover){
+    .start:hover::before{transform:translateY(0);}
+    .start:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(255,95,31,.32);}
+  }
+  .start:active{transform:translateY(1px) scale(.985);}
+  .start:active::before{transform:translateY(0);}
+  .start:focus-visible{outline:3px solid var(--orange);outline-offset:4px;}
+
+  /* ---- Install chip (only shows when installable) ---- */
+  .install{
+    position:absolute;
+    top:calc(var(--safe-top) + 14px);
+    right:18px;
+    z-index:2;
+    display:none;
+    align-items:center;
+    gap:7px;
+    font-family:var(--body);
+    font-weight:600;
+    font-size:13px;
+    color:var(--black);
+    background:#fff;
+    border:2px solid var(--black);
+    border-radius:999px;
+    padding:7px 14px;
+    cursor:pointer;
+  }
+  .install.show{display:inline-flex;}
+  .install:focus-visible{outline:3px solid var(--orange);outline-offset:3px;}
+
+  .version{
+    position:absolute;
+    bottom:calc(var(--safe-bottom) + 12px);
+    left:0;right:0;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.08em;
+    color:#bdbdbd;
+    z-index:1;
+  }
+
+  /* ---- Entrance sequence ---- */
+  .anim .logo span{
+    opacity:0;
+    animation:pop .5s cubic-bezier(.2,1.3,.4,1) forwards;
+  }
+  .anim .logo .c{animation-delay:.10s;}
+  .anim .logo .s{animation-delay:.20s;}
+  .anim .logo .t{animation-delay:.30s;}
+  .anim .logo .m{animation-delay:.40s;}
+  @keyframes pop{
+    0%{opacity:0;transform:translateY(26px) scale(.7) rotate(0);}
+    100%{opacity:1;}
+  }
+  .anim .tagline{opacity:0;animation:fadeUp .5s ease .56s forwards;}
+  .anim .start-wrap{opacity:0;animation:fadeUp .55s ease .72s forwards;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  @media (prefers-reduced-motion:reduce){
+    .glow{animation:none;}
+    .anim .logo span,.anim .tagline,.anim .start-wrap{animation:none;opacity:1;}
+    .start,.start::before{transition:none;}
+  }
+</style>
+</head>
+<body class="anim">
+  <main class="stage">
+    <div class="glow" aria-hidden="true"></div>
+
+    <button id="installBtn" class="install" type="button" aria-label="Pasang aplikasi">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Pasang
+    </button>
+
+    <header class="brand">
+      <h1 class="logo" aria-label="CSTM">
+        <span class="c" aria-hidden="true">C</span><span class="s" aria-hidden="true">S</span><span class="t" aria-hidden="true">T</span><span class="m" aria-hidden="true">M</span>
+      </h1>
+      <p class="tagline">Customer Service Team Member</p>
+    </header>
+
+    <div class="start-wrap">
+      <button class="start" id="startBtn" type="button"><span>Mulai</span></button>
+    </div>
+
+    <p class="version">v1.0</p>
+  </main>
+
+<script>
+  // ---- Start ----
+  document.getElementById('startBtn').addEventListener('click', () => {
+    // Navigate to the assessment menu (built next).
+    window.location.href = './menu.html';
+  });
+
+  // ---- PWA install prompt ----
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.add('show');
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.classList.remove('show');
+  });
+  window.addEventListener('appinstalled', () => installBtn.classList.remove('show'));
+
+  // ---- Service worker ----
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>
