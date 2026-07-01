@@ -1,20 +1,26 @@
 {
-  "name": "CSTM — Customer Service Team Member",
+  "name": "CSTM - Customer Service Team Member",
   "short_name": "CSTM",
-  "description": "Penilaian 7 Langkah Pelayanan & Double Check Order untuk tim customer service.",
-  "id": "/",
-  "start_url": "./index.html",
+  "description": "Aplikasi Penilaian 7 Langkah Pelayanan & Double Check Order",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "lang": "id",
-  "dir": "ltr",
-  "categories": ["business", "productivity"],
+  "background_color": "#fafafa",
+  "theme_color": "#ea580c",
+  "lang": "id-ID",
   "icons": [
-    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
