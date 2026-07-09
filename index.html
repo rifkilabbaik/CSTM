@@ -637,8 +637,33 @@
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-            .then(() => console.log("Service Worker berhasil didaftarkan"))
+            .then(reg => {
+                console.log("Service Worker berhasil didaftarkan");
+
+                // Cek update setiap kali app dibuka
+                reg.update();
+
+                // Deteksi service worker baru
+                reg.addEventListener("updatefound", () => {
+                    const newSW = reg.installing;
+                    if (!newSW) return;
+                    newSW.addEventListener("statechange", () => {
+                        if (newSW.state === "installed" && navigator.serviceWorker.controller) {
+                            // Versi baru terinstall — aktifkan langsung
+                            newSW.postMessage({ type: "SKIP_WAITING" });
+                        }
+                    });
+                });
+            })
             .catch(err => console.log("SW gagal:", err));
+
+        // Reload otomatis saat service worker baru aktif
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+        });
     });
 }
 </script>
