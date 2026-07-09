@@ -879,7 +879,7 @@ if ("serviceWorker" in navigator) {
     </div>
     <div class="result-footer-btns">
       <button class="btn btn-secondary" onclick="goTo('main')">Menu</button>
-      <button class="btn btn-outline" onclick="salinHasil()">Salin</button>
+      <button class="btn btn-outline" onclick="openSalinModal()">Salin</button>
       <button class="btn btn-primary" onclick="openExportModal()">Export</button>
     </div>
   </div>
@@ -897,6 +897,21 @@ if ("serviceWorker" in navigator) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeExportModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SALIN -->
+<div class="modal-overlay" id="salin-modal">
+  <div class="modal-box">
+    <div class="modal-header">Bagikan Hasil</div>
+    <div class="modal-options">
+      <div class="modal-option" onclick="salinShare('telegram')">Telegram</div>
+      <div class="modal-option" onclick="salinShare('whatsapp')">WhatsApp</div>
+      <div class="modal-option" onclick="salinShare('copy')">Salin ke Clipboard</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeSalinModal()">Batal</button>
     </div>
   </div>
 </div>
@@ -1956,9 +1971,26 @@ function resetResultPctStyle() {
 }
 
 // ===== COPY & SHARE =====
-function salinHasil() {
+function openSalinModal() {
   if (!state.resultText) return;
-  copyToClipboard(state.resultText).then(() => showToast('Disalin ke clipboard'));
+  document.getElementById('salin-modal').classList.add('show');
+}
+function closeSalinModal() {
+  document.getElementById('salin-modal').classList.remove('show');
+}
+function salinShare(target) {
+  closeSalinModal();
+  if (!state.resultText) return;
+  const encoded = encodeURIComponent(state.resultText);
+  if (target === 'telegram') {
+    // Buka Telegram (app di mobile, web di desktop) dengan teks pre-filled
+    window.open('https://t.me/share/url?url=%20&text=' + encoded, '_blank');
+  } else if (target === 'whatsapp') {
+    // Buka WhatsApp (app di mobile, web di desktop) dengan teks pre-filled
+    window.open('https://wa.me/?text=' + encoded, '_blank');
+  } else if (target === 'copy') {
+    copyToClipboard(state.resultText).then(() => showToast('Disalin ke clipboard'));
+  }
 }
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
@@ -2004,7 +2036,7 @@ async function exportAndShare(fmt) {
       file = new File([blob], filename + ext, { type: mime });
     } else if (fmt === 'md') {
       const md = buildMarkdownText();
-      mime = 'text/markdown';
+      mime = 'text/plain';
       ext = '.md';
       file = new File([md], filename + ext, { type: mime });
     }
@@ -2014,8 +2046,8 @@ async function exportAndShare(fmt) {
     return;
   }
 
-  // Coba Web Share API dengan file
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  // Coba Web Share API dengan file — force attempt tanpa canShare check dulu
+  if (navigator.share) {
     try {
       await navigator.share({
         files: [file],
@@ -2025,7 +2057,7 @@ async function exportAndShare(fmt) {
       return;
     } catch (err) {
       if (err.name === 'AbortError') return; // user batal
-      console.error('Share error:', err);
+      console.log('Share fallback:', err);
       // lanjut ke fallback download
     }
   }
@@ -2264,6 +2296,9 @@ window.goTo = function(screen) {
 // Close export modal on overlay click
 document.getElementById('export-modal').addEventListener('click', function(e) {
   if (e.target === this) closeExportModal();
+});
+document.getElementById('salin-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSalinModal();
 });
 
 // ===== INIT =====
