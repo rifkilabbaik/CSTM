@@ -6,7 +6,10 @@
 <link rel="apple-touch-icon" href="icons/icon-152.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSTM - Customer Service Team Member</title>
+<title>Takbiran - Cetak Biru Pelayanan</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -46,7 +49,6 @@
     box-shadow: var(--shadow-lg);
   }
 
-  /* SCREENS */
   .screen {
     position: absolute;
     inset: 0;
@@ -64,12 +66,8 @@
     pointer-events: all;
     transform: translateX(0);
   }
-  .screen.exit-left {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
+  .screen.exit-left { opacity: 0; transform: translateX(-30px); }
 
-  /* MAIN MENU */
   #screen-main {
     justify-content: center;
     align-items: center;
@@ -77,17 +75,17 @@
     background: linear-gradient(160deg, #fff7ed 0%, #fafafa 60%);
   }
   .main-logo {
-    font-size: 72px;
+    font-size: 56px;
     font-weight: 800;
     color: var(--primary);
-    letter-spacing: -3px;
+    letter-spacing: -2px;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
   .main-subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.5px;
     text-align: center;
     margin-bottom: 48px;
@@ -100,7 +98,6 @@
     line-height: 1.6;
   }
 
-  /* BUTTONS */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -118,15 +115,9 @@
     -webkit-tap-highlight-color: transparent;
   }
   .btn:active { transform: scale(0.97); }
-  .btn-primary {
-    background: var(--primary);
-    color: white;
-  }
+  .btn-primary { background: var(--primary); color: white; }
   .btn-primary:hover { background: var(--primary-dark); }
-  .btn-primary:disabled {
-    background: #d1d5db;
-    cursor: not-allowed;
-  }
+  .btn-primary:disabled { background: #d1d5db; cursor: not-allowed; }
   .btn-primary:disabled:active { transform: none; }
   .btn-secondary {
     background: var(--surface);
@@ -143,7 +134,6 @@
   .btn-full { width: 100%; }
   .btn-lg { padding: 16px 28px; font-size: 16px; }
 
-  /* PAGE HEADER */
   .page-header {
     padding: 20px 20px 12px;
     border-bottom: 1px solid var(--border);
@@ -152,18 +142,9 @@
     top: 0;
     z-index: 10;
   }
-  .page-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .page-step {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
+  .page-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .page-step { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-  /* PAGE CONTENT */
   .page-content {
     flex: 1;
     padding: 20px;
@@ -178,7 +159,6 @@
   }
   .page-footer .btn { flex: 1; }
 
-  /* CARDS */
   .card {
     background: var(--surface);
     border: 2px solid var(--border);
@@ -194,10 +174,6 @@
     border-color: var(--primary);
     background: var(--primary-light);
   }
-  .card-icon {
-    font-size: 28px;
-    margin-bottom: 10px;
-  }
   .card-title {
     font-size: 16px;
     font-weight: 700;
@@ -211,10 +187,7 @@
   }
   .card.selected .card-title { color: var(--primary); }
 
-  /* FORM */
-  .form-group {
-    margin-bottom: 18px;
-  }
+  .form-group { margin-bottom: 18px; }
   .form-label {
     display: block;
     font-size: 13px;
@@ -240,18 +213,16 @@
   }
   .form-control:focus { border-color: var(--primary); }
   .form-control::placeholder { color: var(--text-light); }
-
-  /* DROPDOWN */
-  .dropdown-wrap {
-    position: relative;
-  }
-  .dropdown-input-wrap {
-    position: relative;
-  }
-  .dropdown-input-wrap .form-control {
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
     padding-right: 40px;
-    cursor: pointer;
   }
+
+  .dropdown-wrap { position: relative; }
+  .dropdown-input-wrap { position: relative; }
+  .dropdown-input-wrap .form-control { padding-right: 40px; cursor: pointer; }
   .dropdown-arrow {
     position: absolute;
     right: 12px;
@@ -293,14 +264,11 @@
     text-align: center;
   }
 
-  /* SCORING */
-  .section-block {
-    margin-bottom: 20px;
-  }
+  .section-block { margin-bottom: 20px; }
   .section-title {
     font-size: 16px;
     font-weight: 700;
-    color:  #ea580c;
+    color: #ea580c;
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 10px 0 8px;
@@ -365,6 +333,70 @@
   .score-keterangan:focus { border-color: var(--primary); }
   .score-keterangan::placeholder { color: var(--text-light); }
 
+  /* Checklist for Kebersihan */
+  .check-wrap {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .check-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .check-btn:hover { border-color: var(--primary); }
+  .check-btn.check-yes.selected {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: white;
+  }
+  .check-btn.check-no.selected {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+  }
+  .score-item-bobot {
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 500;
+    margin-left: 6px;
+  }
+
+  /* GMO Input */
+  .gmo-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .gmo-info-box {
+    background: var(--primary-light);
+    border: 1.5px solid #fdba74;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 4px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .gmo-info-box strong { color: var(--primary); font-weight: 700; }
+  .komplain-list { margin-bottom: 8px; }
+  .komplain-item {
+    margin-bottom: 8px;
+  }
+
   /* RESULTS */
   .result-header {
     background: linear-gradient(135deg, var(--primary) 0%, #f97316 100%);
@@ -384,9 +416,13 @@
     font-weight: 600;
     opacity: 0.9;
   }
-  .result-body {
-    padding: 20px;
+  .result-subtitle {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 6px;
+    font-weight: 500;
   }
+  .result-body { padding: 20px; }
   .result-section {
     margin-bottom: 16px;
     border: 1px solid var(--border);
@@ -416,9 +452,7 @@
     padding: 3px 8px;
     border-radius: 20px;
   }
-  .result-section-items {
-    padding: 10px 14px;
-  }
+  .result-section-items { padding: 10px 14px; }
   .result-item {
     padding: 5px 0;
     border-bottom: 1px dashed #f0f0f0;
@@ -518,16 +552,10 @@
     border-top: 8px solid #1f2937;
   }
 
-  /* MISC */
   .section-cards {
     display: flex;
     flex-direction: column;
     gap: 12px;
-  }
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 16px 0;
   }
   .info-text {
     font-size: 13px;
@@ -537,8 +565,8 @@
   }
   .result-footer-btns {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
     padding: 16px 20px;
     border-top: 1px solid var(--border);
     background: var(--surface);
@@ -546,9 +574,59 @@
     bottom: 0;
   }
   .result-footer-btns .btn {
-    font-size: 13px;
-    padding: 12px 8px;
+    font-size: 12px;
+    padding: 11px 4px;
   }
+
+  /* MODAL / POPUP */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    padding: 20px;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 320px;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-overlay.show .modal-box { transform: scale(1); }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .modal-options { padding: 8px; }
+  .modal-option {
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .modal-option:hover { background: var(--primary-light); color: var(--primary); }
+  .modal-footer {
+    padding: 8px 12px 12px;
+  }
+  .modal-footer .btn { width: 100%; }
 
   @media (min-width: 481px) {
     #app { margin: 0 auto; }
@@ -567,12 +645,12 @@ if ("serviceWorker" in navigator) {
 <body>
 <div id="app">
 
-  <!-- SCREEN 1: MAIN MENU -->
+  <!-- SCREEN: MAIN MENU -->
   <div class="screen active" id="screen-main">
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 28px;">
-      <div class="main-logo">CSTM</div>
-      <div class="main-subtitle">Customer Service Team Member</div>
-      <div class="main-desc">Media evaluasi kinerja pelayanan<br>untuk tim kasir & server</div>
+      <div class="main-logo">Takbiran</div>
+      <div class="main-subtitle">Cetak Biru Pelayanan</div>
+      <div class="main-desc">Media evaluasi kinerja pelayanan<br>untuk tim kasir, server, dan auditor</div>
       <button class="btn btn-primary btn-lg btn-full" onclick="goTo('menu-pilihan')" style="max-width:240px;">
         Mulai
       </button>
@@ -582,24 +660,29 @@ if ("serviceWorker" in navigator) {
     </div>
   </div>
 
-  <!-- SCREEN 2: MENU PILIHAN -->
+  <!-- SCREEN: MENU PILIHAN -->
   <div class="screen" id="screen-menu-pilihan">
     <div class="page-header">
       <div class="page-title">Penilaian</div>
-      <div class="page-step"></div>
     </div>
     <div class="page-content">
       <p class="info-text">Pilih jenis penilaian yang akan dilakukan:</p>
       <div class="section-cards">
+        <div class="card" id="card-gmo" onclick="selectJenis('gmo')">
+          <div class="card-title">Google Maps dan Online</div>
+          <div class="card-desc">Evaluasi platform Google Maps, Shopeefood, Gofood, Grabfood</div>
+        </div>
         <div class="card" id="card-7langkah" onclick="selectJenis('7langkah')">
-          <div class="card-icon"></div>
           <div class="card-title">7 Langkah Pelayanan</div>
           <div class="card-desc">Evaluasi alur pelayanan kasir</div>
         </div>
         <div class="card" id="card-doublecheck" onclick="selectJenis('doublecheck')">
-          <div class="card-icon"></div>
           <div class="card-title">Double Check Order</div>
           <div class="card-desc">Evaluasi proses pengecekan pesanan sebelum diserahkan ke customer</div>
+        </div>
+        <div class="card" id="card-kebersihan" onclick="selectJenis('kebersihan')">
+          <div class="card-title">Kebersihan</div>
+          <div class="card-desc">Evaluasi kebersihan area outlet</div>
         </div>
       </div>
     </div>
@@ -609,11 +692,81 @@ if ("serviceWorker" in navigator) {
     </div>
   </div>
 
-  <!-- SCREEN 3: FORM INPUT -->
+  <!-- SCREEN: SUB KEBERSIHAN -->
+  <div class="screen" id="screen-sub-kebersihan">
+    <div class="page-header">
+      <div class="page-title">Kebersihan</div>
+      <div class="page-step">Pilih area</div>
+    </div>
+    <div class="page-content">
+      <p class="info-text">Pilih area yang akan dinilai kebersihannya:</p>
+      <div class="section-cards">
+        <div class="card" id="sub-parkir" onclick="selectSub('parkir')">
+          <div class="card-title">Parkir</div>
+          <div class="card-desc">9 item penilaian</div>
+        </div>
+        <div class="card" id="sub-counter" onclick="selectSub('counter')">
+          <div class="card-title">Counter Kasir</div>
+          <div class="card-desc">12 item penilaian</div>
+        </div>
+        <div class="card" id="sub-dining" onclick="selectSub('dining')">
+          <div class="card-title">Dining</div>
+          <div class="card-desc">28 item penilaian</div>
+        </div>
+        <div class="card" id="sub-toilet" onclick="selectSub('toilet')">
+          <div class="card-title">Toilet</div>
+          <div class="card-desc">14 item penilaian</div>
+        </div>
+        <div class="card" id="sub-mushola" onclick="selectSub('mushola')">
+          <div class="card-title">Mushola</div>
+          <div class="card-desc">13 item penilaian</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <button class="btn btn-secondary" onclick="goTo('menu-pilihan')">Kembali</button>
+      <button class="btn btn-primary" id="btn-lanjut-sub-keb" onclick="lanjutSub()" disabled>Lanjut</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: SUB GMO -->
+  <div class="screen" id="screen-sub-gmo">
+    <div class="page-header">
+      <div class="page-title">Google Maps dan Online</div>
+      <div class="page-step">Pilih platform</div>
+    </div>
+    <div class="page-content">
+      <p class="info-text">Pilih platform yang akan dinilai:</p>
+      <div class="section-cards">
+        <div class="card" id="sub-gmaps" onclick="selectSub('gmaps')">
+          <div class="card-title">Google Maps</div>
+          <div class="card-desc">Akuisisi, rating, dan komplain</div>
+        </div>
+        <div class="card" id="sub-shopee" onclick="selectSub('shopee')">
+          <div class="card-title">Shopeefood</div>
+          <div class="card-desc">Rating, skor outlet, dan menu</div>
+        </div>
+        <div class="card" id="sub-gofood" onclick="selectSub('gofood')">
+          <div class="card-title">Gofood</div>
+          <div class="card-desc">Rating, skor outlet, dan menu</div>
+        </div>
+        <div class="card" id="sub-grab" onclick="selectSub('grab')">
+          <div class="card-title">Grabfood</div>
+          <div class="card-desc">Rating, skor outlet, dan menu</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <button class="btn btn-secondary" onclick="goTo('menu-pilihan')">Kembali</button>
+      <button class="btn btn-primary" id="btn-lanjut-sub-gmo" onclick="lanjutSub()" disabled>Lanjut</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: FORM -->
   <div class="screen" id="screen-form">
     <div class="page-header">
       <div class="page-title">Data Penilaian</div>
-      <div class="page-step"></div>
+      <div class="page-step" id="form-step"></div>
     </div>
     <div class="page-content">
       <div class="form-group">
@@ -644,16 +797,16 @@ if ("serviceWorker" in navigator) {
       </div>
     </div>
     <div class="page-footer">
-      <button class="btn btn-secondary" onclick="goTo('menu-pilihan')">Kembali</button>
+      <button class="btn btn-secondary" style="flex:0 0 auto;padding:14px 16px;" onclick="backFromForm()">Kembali</button>
+      <button class="btn btn-outline" style="flex:0 0 auto;padding:14px 16px;" onclick="resetForm()">Reset</button>
       <button class="btn btn-primary" onclick="lanjutForm()">Lanjut</button>
     </div>
   </div>
 
-  <!-- SCREEN 4: SCORING -->
+  <!-- SCREEN: SCORING (1-5) -->
   <div class="screen" id="screen-scoring">
     <div class="page-header">
       <div class="page-title" id="scoring-title">Penilaian</div>
-      <div class="page-step"></div>
     </div>
     <div class="page-content" id="scoring-content"></div>
     <div class="page-footer">
@@ -663,21 +816,67 @@ if ("serviceWorker" in navigator) {
     </div>
   </div>
 
-  <!-- SCREEN 5: HASIL -->
-  <div class="screen" id="screen-hasil">
-    <div class="result-header" id="result-header">
-      <div class="result-pct" id="result-pct">--</div>
-      <div class="result-label" id="result-label">--</div>
+  <!-- SCREEN: CHECKLIST (Kebersihan) -->
+  <div class="screen" id="screen-checklist">
+    <div class="page-header">
+      <div class="page-title" id="checklist-title">Kebersihan</div>
     </div>
-    <div class="result-body" id="result-body"></div>
+    <div class="page-content" id="checklist-content"></div>
+    <div class="page-footer">
+      <button class="btn btn-secondary" style="flex:0 0 auto;padding:14px 16px;" onclick="goTo('form')">Kembali</button>
+      <button class="btn btn-outline" style="flex:0 0 auto;padding:14px 16px;" onclick="resetChecklist()">Reset</button>
+      <button class="btn btn-primary" onclick="lanjutChecklist()">Lanjut</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: GMO INPUT -->
+  <div class="screen" id="screen-gmo-input">
+    <div class="page-header">
+      <div class="page-title" id="gmo-title">Google Maps</div>
+    </div>
+    <div class="page-content" id="gmo-content"></div>
+    <div class="page-footer">
+      <button class="btn btn-secondary" style="flex:0 0 auto;padding:14px 16px;" onclick="goTo('form')">Kembali</button>
+      <button class="btn btn-outline" style="flex:0 0 auto;padding:14px 16px;" onclick="resetGmo()">Reset</button>
+      <button class="btn btn-primary" onclick="lanjutGmo()">Lanjut</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: HASIL -->
+  <div class="screen" id="screen-hasil">
+    <div id="result-capture-area">
+      <div class="result-header" id="result-header">
+        <div class="result-pct" id="result-pct">--</div>
+        <div class="result-label" id="result-label">--</div>
+        <div class="result-subtitle" id="result-subtitle"></div>
+      </div>
+      <div class="result-body" id="result-body"></div>
+    </div>
     <div class="result-footer-btns">
       <button class="btn btn-secondary" onclick="goTo('main')">Menu</button>
       <button class="btn btn-outline" onclick="salinHasil()">Salin</button>
       <button class="btn btn-primary" onclick="shareTelegram()">Telegram</button>
+      <button class="btn btn-outline" onclick="openExportModal()">Export</button>
     </div>
   </div>
 
 </div>
+
+<!-- MODAL EXPORT -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal-box">
+    <div class="modal-header">Pilih Format Export</div>
+    <div class="modal-options">
+      <div class="modal-option" onclick="exportAs('excel')">Excel (.xlsx)</div>
+      <div class="modal-option" onclick="exportAs('pdf')">PDF (.pdf)</div>
+      <div class="modal-option" onclick="exportAs('md')">Markdown (.md)</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeExportModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -748,13 +947,131 @@ const DATA_DOUBLECHECK = [
 ];
 const DC_BOBOT = 100 / 15;
 
+// KEBERSIHAN DATA (checklist, bobot = poin, total 100 per area)
+const DATA_KEBERSIHAN = {
+  parkir: {
+    label: "Parkir",
+    items: [
+      { name: "Area parkir bersih dan rapi", bobot: 15 },
+      { name: "Marka parkir jelas dan tidak pudar", bobot: 5 },
+      { name: "Tulisan \"Parkir Gratis\" tersedia", bobot: 15 },
+      { name: "Tempat sampah tersedia", bobot: 5 },
+      { name: "Tempat sampah bersih & tertutup", bobot: 10 },
+      { name: "Tanaman bersih & terawat", bobot: 5 },
+      { name: "Tidak ada bau menyengat", bobot: 15 },
+      { name: "CCTV tersedia", bobot: 15 },
+      { name: "CCTV berfungsi dengan baik", bobot: 15 },
+    ]
+  },
+  counter: {
+    label: "Counter Kasir",
+    items: [
+      { name: "Counter bersih dari debu & kotoran", bobot: 12 },
+      { name: "Area counter bersih & rapi", bobot: 10 },
+      { name: "Balon tersedia (akhir pekan)", bobot: 5 },
+      { name: "Payung tersedia", bobot: 5 },
+      { name: "Tempat sampah tersedia", bobot: 5 },
+      { name: "Tempat sampah bersih & tertutup", bobot: 8 },
+      { name: "Lampu chicken warm menyala semua", bobot: 12 },
+      { name: "Menu board jelas & tidak pudar", bobot: 10 },
+      { name: "Media promosi terbaru terpasang", bobot: 10 },
+      { name: "Menu TV Board menyala", bobot: 8 },
+      { name: "Menu TV Board menampilkan menu relevan", bobot: 7 },
+      { name: "Tempat menunggu pesanan tersedia", bobot: 8 },
+    ]
+  },
+  dining: {
+    label: "Dining",
+    items: [
+      { name: "Kaca & pintu bersih tanpa noda", bobot: 3 },
+      { name: "Lantai bersih", bobot: 5 },
+      { name: "Tidak ada ubin pecah membahayakan", bobot: 5 },
+      { name: "Dinding bersih & cemerlang", bobot: 3 },
+      { name: "Meja bersih & tidak lengket", bobot: 6 },
+      { name: "Kursi bersih & kokoh", bobot: 5 },
+      { name: "Langit-langit bersih (tanpa sarang laba-laba)", bobot: 3 },
+      { name: "Tempat sampah tersedia", bobot: 2 },
+      { name: "Tempat sampah bersih & tertutup", bobot: 3 },
+      { name: "Suhu udara nyaman", bobot: 5 },
+      { name: "Tidak ada bau menyengat", bobot: 5 },
+      { name: "Pengharum ruangan tersedia", bobot: 2 },
+      { name: "Wi-Fi tersedia", bobot: 3 },
+      { name: "Kecepatan internet baik", bobot: 3 },
+      { name: "Colokan listrik berfungsi", bobot: 3 },
+      { name: "Colokan listrik terpasang rapi & aman", bobot: 3 },
+      { name: "Lampu menyala semua", bobot: 3 },
+      { name: "Nasyid diputar dengan volume sesuai", bobot: 5 },
+      { name: "Bebas serangga, kucing, pengamen", bobot: 5 },
+      { name: "Baby chair tersedia", bobot: 2 },
+      { name: "Baby chair bersih & berfungsi", bobot: 3 },
+      { name: "Playland tersedia", bobot: 2 },
+      { name: "Playland bersih & aman", bobot: 4 },
+      { name: "Wastafel tersedia", bobot: 2 },
+      { name: "Wastafel bersih", bobot: 4 },
+      { name: "Kaca wastafel bersih", bobot: 2 },
+      { name: "Sabun cuci tangan tersedia", bobot: 5 },
+      { name: "Pengering/tisu tangan tersedia", bobot: 4 },
+    ]
+  },
+  toilet: {
+    label: "Toilet",
+    items: [
+      { name: "Toilet bersih & tidak berbau", bobot: 14 },
+      { name: "Lantai bersih & tidak licin", bobot: 10 },
+      { name: "Dinding bersih", bobot: 5 },
+      { name: "Langit-langit bersih", bobot: 3 },
+      { name: "Air mengalir lancar", bobot: 10 },
+      { name: "Flush toilet berfungsi", bobot: 10 },
+      { name: "Pintu dapat dikunci", bobot: 8 },
+      { name: "Sabun cuci tangan tersedia", bobot: 8 },
+      { name: "Tisu toilet tersedia", bobot: 5 },
+      { name: "Tempat sampah tersedia", bobot: 3 },
+      { name: "Tempat sampah bersih & tertutup", bobot: 5 },
+      { name: "Pengharum ruangan tersedia", bobot: 5 },
+      { name: "Lampu menyala baik", bobot: 7 },
+      { name: "Ventilasi/exhaust berfungsi", bobot: 7 },
+    ]
+  },
+  mushola: {
+    label: "Mushola",
+    items: [
+      { name: "Lantai bersih, tidak lengket/licin", bobot: 13 },
+      { name: "Tempat wudhu bersih", bobot: 10 },
+      { name: "Air wudhu mengalir lancar", bobot: 10 },
+      { name: "Sandal wudhu tersedia", bobot: 5 },
+      { name: "Sajadah tersedia", bobot: 8 },
+      { name: "Sarung tersedia", bobot: 5 },
+      { name: "Mukena tersedia", bobot: 8 },
+      { name: "Sajadah, sarung, mukena bersih & harum", bobot: 10 },
+      { name: "Al-Quran tersedia", bobot: 5 },
+      { name: "Rak perlengkapan rapi", bobot: 3 },
+      { name: "Pengharum ruangan tersedia", bobot: 5 },
+      { name: "Tidak ada bau menyengat", bobot: 10 },
+      { name: "Arah kiblat terlihat jelas", bobot: 8 },
+    ]
+  }
+};
+
+const GMO_LABEL = {
+  gmaps: "Google Maps",
+  shopee: "Shopeefood",
+  gofood: "Gofood",
+  grab: "Grabfood"
+};
+
 // ===== STATE =====
 let state = {
   currentScreen: 'main',
   jenisSelected: null,
+  subSelected: null,
   tokoSelected: '',
   scores: {},
   keterangan: {},
+  checklist: {},          // for kebersihan (yes/no)
+  checkKeterangan: {},    // for kebersihan
+  gmo: {},                // for gmaps/shopee/gofood/grab
+  resultText: '',
+  resultData: null,
 };
 
 // ===== NAVIGATION =====
@@ -762,8 +1079,12 @@ function goTo(screen) {
   const mapping = {
     'main': 'screen-main',
     'menu-pilihan': 'screen-menu-pilihan',
+    'sub-kebersihan': 'screen-sub-kebersihan',
+    'sub-gmo': 'screen-sub-gmo',
     'form': 'screen-form',
     'scoring': 'screen-scoring',
+    'checklist': 'screen-checklist',
+    'gmo-input': 'screen-gmo-input',
     'hasil': 'screen-hasil',
   };
   const current = document.querySelector('.screen.active');
@@ -791,45 +1112,106 @@ function goTo(screen) {
   state.currentScreen = screen;
 
   if (screen === 'form') {
-    const kasirLabel = document.getElementById('kasir-label');
-    kasirLabel.textContent = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' : 'Nama Kasir';
-    document.getElementById('kasir-input').placeholder = state.jenisSelected === 'doublecheck' ? 'Masukkan nama kasir/server' : 'Masukkan nama kasir';
+    updateFormLabels();
     initFormDefaults();
   }
-  if (screen === 'scoring') {
-    buildScoringUI();
-  }
-  if (screen === 'main') {
-    // reset everything
-    state.jenisSelected = null;
-    state.tokoSelected = '';
-    state.scores = {};
-    state.keterangan = {};
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-    document.getElementById('btn-lanjut-jenis').disabled = true;
-    document.getElementById('toko-input').value = '';
-    document.getElementById('kasir-input').value = '';
-    closeDropdown();
-  }
+  if (screen === 'scoring') { buildScoringUI(); scrollScreenTop('screen-scoring'); }
+  if (screen === 'checklist') { buildChecklistUI(); scrollScreenTop('screen-checklist'); }
+  if (screen === 'gmo-input') { buildGmoUI(); scrollScreenTop('screen-gmo-input'); }
+  if (screen === 'hasil') scrollScreenTop('screen-hasil');
+  if (screen === 'main') resetAll();
+}
+
+function scrollScreenTop(id) {
+  requestAnimationFrame(() => {
+    const el = document.getElementById(id);
+    if (el) el.scrollTop = 0;
+    const content = el ? el.querySelector('.page-content') : null;
+    if (content) content.scrollTop = 0;
+  });
+}
+
+function resetAll() {
+  state.jenisSelected = null;
+  state.subSelected = null;
+  state.tokoSelected = '';
+  state.scores = {};
+  state.keterangan = {};
+  state.checklist = {};
+  state.checkKeterangan = {};
+  state.gmo = {};
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btn-lanjut-jenis').disabled = true;
+  document.getElementById('btn-lanjut-sub-keb').disabled = true;
+  document.getElementById('btn-lanjut-sub-gmo').disabled = true;
+  document.getElementById('toko-input').value = '';
+  document.getElementById('kasir-input').value = '';
+  closeDropdown();
 }
 
 // ===== MENU PILIHAN =====
 function selectJenis(jenis) {
   state.jenisSelected = jenis;
-  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#screen-menu-pilihan .card').forEach(c => c.classList.remove('selected'));
   document.getElementById('card-' + jenis).classList.add('selected');
   document.getElementById('btn-lanjut-jenis').disabled = false;
 }
 
 function lanjutJenis() {
   if (!state.jenisSelected) return;
+  if (state.jenisSelected === 'kebersihan') {
+    state.subSelected = null;
+    document.querySelectorAll('#screen-sub-kebersihan .card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('btn-lanjut-sub-keb').disabled = true;
+    goTo('sub-kebersihan');
+  } else if (state.jenisSelected === 'gmo') {
+    state.subSelected = null;
+    document.querySelectorAll('#screen-sub-gmo .card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('btn-lanjut-sub-gmo').disabled = true;
+    goTo('sub-gmo');
+  } else {
+    goTo('form');
+  }
+}
+
+function selectSub(sub) {
+  state.subSelected = sub;
+  const parent = state.jenisSelected === 'kebersihan' ? '#screen-sub-kebersihan' : '#screen-sub-gmo';
+  document.querySelectorAll(parent + ' .card').forEach(c => c.classList.remove('selected'));
+  const idPrefix = state.jenisSelected === 'kebersihan' ? 'sub-' : 'sub-';
+  document.getElementById(idPrefix + sub).classList.add('selected');
+  const btnId = state.jenisSelected === 'kebersihan' ? 'btn-lanjut-sub-keb' : 'btn-lanjut-sub-gmo';
+  document.getElementById(btnId).disabled = false;
+}
+
+function lanjutSub() {
+  if (!state.subSelected) return;
   goTo('form');
 }
 
-// ===== DROPDOWN =====
-let dropdownOpen = false;
-let currentFilter = '';
+function backFromForm() {
+  if (state.jenisSelected === 'kebersihan') goTo('sub-kebersihan');
+  else if (state.jenisSelected === 'gmo') goTo('sub-gmo');
+  else goTo('menu-pilihan');
+}
 
+function updateFormLabels() {
+  const kasirLabel = document.getElementById('kasir-label');
+  const kasirInput = document.getElementById('kasir-input');
+  if (state.jenisSelected === 'doublecheck') {
+    kasirLabel.textContent = 'Nama Kasir/Server';
+    kasirInput.placeholder = 'Masukkan nama kasir/server';
+  } else if (state.jenisSelected === 'kebersihan' || state.jenisSelected === 'gmo') {
+    kasirLabel.textContent = 'Nama Auditor';
+    kasirInput.placeholder = 'Masukkan nama auditor';
+  } else {
+    kasirLabel.textContent = 'Nama Kasir';
+    kasirInput.placeholder = 'Masukkan nama kasir';
+  }
+}
+
+// ===== DROPDOWN TOKO =====
+let dropdownOpen = false;
 function renderDropdownList(filter) {
   const list = document.getElementById('toko-list');
   const filtered = TOKO_LIST.filter(t => t.toLowerCase().includes(filter.toLowerCase()));
@@ -837,48 +1219,39 @@ function renderDropdownList(filter) {
     list.innerHTML = '<div class="dropdown-empty">Tidak ditemukan</div>';
     return;
   }
-  list.innerHTML = filtered.map(t => 
+  list.innerHTML = filtered.map(t =>
     `<div class="dropdown-item${t === state.tokoSelected ? ' selected' : ''}" onclick="selectToko('${t.replace(/'/g, "\\'")}')">${t}</div>`
   ).join('');
 }
-
 function openDropdown() {
   dropdownOpen = true;
   document.getElementById('toko-list').classList.add('open');
   document.getElementById('toko-arrow').classList.add('open');
   renderDropdownList(document.getElementById('toko-input').value);
 }
-
 function closeDropdown() {
   dropdownOpen = false;
   const list = document.getElementById('toko-list');
   const arrow = document.getElementById('toko-arrow');
   if (list) list.classList.remove('open');
   if (arrow) arrow.classList.remove('open');
-  // restore selected value if input doesn't match
   const input = document.getElementById('toko-input');
   if (input && state.tokoSelected && input.value !== state.tokoSelected) {
     input.value = state.tokoSelected;
   }
 }
-
 function filterToko(val) {
-  currentFilter = val;
   if (!dropdownOpen) openDropdown();
   renderDropdownList(val);
 }
-
 function selectToko(name) {
   state.tokoSelected = name;
   document.getElementById('toko-input').value = name;
   closeDropdown();
 }
-
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('toko-dropdown-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    closeDropdown();
-  }
+  if (wrap && !wrap.contains(e.target)) closeDropdown();
 });
 
 // ===== FORM =====
@@ -894,6 +1267,22 @@ function initFormDefaults() {
   if (!tanggalInput.value) tanggalInput.value = `${yyyy}-${mm}-${dd}`;
   if (!jamInput.value) jamInput.value = `${hh}:${min}`;
 }
+function resetForm() {
+  state.tokoSelected = '';
+  document.getElementById('toko-input').value = '';
+  document.getElementById('kasir-input').value = '';
+  // Reset tanggal & jam ke sekarang
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const hh = String(now.getHours()).padStart(2,'0');
+  const min = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('tanggal-input').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('jam-input').value = `${hh}:${min}`;
+  closeDropdown();
+  showToast('Data dikosongkan');
+}
 
 function lanjutForm() {
   const toko = state.tokoSelected || document.getElementById('toko-input').value.trim();
@@ -908,10 +1297,13 @@ function lanjutForm() {
   state.kasir = kasir;
   state.tanggal = tanggal;
   state.jam = jam;
-  goTo('scoring');
+
+  if (state.jenisSelected === '7langkah' || state.jenisSelected === 'doublecheck') goTo('scoring');
+  else if (state.jenisSelected === 'kebersihan') goTo('checklist');
+  else if (state.jenisSelected === 'gmo') goTo('gmo-input');
 }
 
-// ===== SCORING =====
+// ===== SCORING (7langkah / doublecheck) =====
 function getDataForJenis() {
   if (state.jenisSelected === '7langkah') return DATA_7LANGKAH;
   return DATA_DOUBLECHECK.map(s => ({
@@ -919,7 +1311,6 @@ function getDataForJenis() {
     items: s.items.map(it => ({ ...it, bobot: DC_BOBOT }))
   }));
 }
-
 function buildScoringUI() {
   const data = getDataForJenis();
   const title = state.jenisSelected === '7langkah' ? '7 Langkah Pelayanan' : 'Double Check Order';
@@ -946,18 +1337,13 @@ function buildScoringUI() {
   });
   document.getElementById('scoring-content').innerHTML = html;
 }
-
 function setScore(key, val) {
   state.scores[key] = val;
   document.querySelectorAll(`[data-key="${key}"]`).forEach(btn => {
     btn.classList.toggle('selected', parseInt(btn.dataset.val) === val);
   });
 }
-
-function setKet(key, val) {
-  state.keterangan[key] = val;
-}
-
+function setKet(key, val) { state.keterangan[key] = val; }
 function resetScoring() {
   const data = getDataForJenis();
   let total = 0;
@@ -972,7 +1358,6 @@ function resetScoring() {
   }
   showToast('Semua nilai dikosongkan');
 }
-
 function lanjutScoring() {
   const data = getDataForJenis();
   let idx = 0;
@@ -984,22 +1369,229 @@ function lanjutScoring() {
     });
   });
   if (!allFilled) { showToast('Isi semua nilai terlebih dahulu'); return; }
-  buildResults();
+  buildResultsScoring();
+  goTo('hasil');
+}
+
+// ===== CHECKLIST (Kebersihan) =====
+function buildChecklistUI() {
+  const area = DATA_KEBERSIHAN[state.subSelected];
+  document.getElementById('checklist-title').textContent = 'Kebersihan - ' + area.label;
+  state.checklist = {};
+  state.checkKeterangan = {};
+
+  let html = `<div class="section-block"><div class="section-title">${area.label.toUpperCase()}</div>`;
+  area.items.forEach((item, idx) => {
+    const key = 'chk_' + idx;
+    html += `<div class="score-item">
+      <div class="score-item-label">${item.name}</div>
+      <div class="check-wrap">
+        <button class="check-btn check-yes" data-key="${key}" data-val="yes" onclick="setCheck('${key}','yes')">Ya</button>
+        <button class="check-btn check-no" data-key="${key}" data-val="no" onclick="setCheck('${key}','no')">Tidak</button>
+      </div>
+      <textarea class="score-keterangan" id="chket_${key}" placeholder="Keterangan opsional..." rows="1" oninput="setCheckKet('${key}',this.value)"></textarea>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('checklist-content').innerHTML = html;
+}
+function setCheck(key, val) {
+  state.checklist[key] = val;
+  document.querySelectorAll(`.check-btn[data-key="${key}"]`).forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.val === val);
+  });
+}
+function setCheckKet(key, val) { state.checkKeterangan[key] = val; }
+function resetChecklist() {
+  const area = DATA_KEBERSIHAN[state.subSelected];
+  state.checklist = {};
+  state.checkKeterangan = {};
+  area.items.forEach((_, idx) => {
+    const key = 'chk_' + idx;
+    document.querySelectorAll(`.check-btn[data-key="${key}"]`).forEach(btn => btn.classList.remove('selected'));
+    const ket = document.getElementById('chket_' + key);
+    if (ket) ket.value = '';
+  });
+  showToast('Semua nilai dikosongkan');
+}
+function lanjutChecklist() {
+  const area = DATA_KEBERSIHAN[state.subSelected];
+  let allFilled = true;
+  area.items.forEach((_, idx) => {
+    if (!state.checklist['chk_' + idx]) allFilled = false;
+  });
+  if (!allFilled) { showToast('Isi semua nilai terlebih dahulu'); return; }
+  buildResultsChecklist();
+  goTo('hasil');
+}
+
+// ===== GMO INPUT =====
+function buildGmoUI() {
+  const sub = state.subSelected;
+  document.getElementById('gmo-title').textContent = GMO_LABEL[sub];
+  state.gmo = { komplain: [''] };
+
+  let html = '';
+
+  if (sub === 'gmaps') {
+    html += `<div class="section-block">
+      <div class="section-title">Akuisisi Google Maps</div>
+      <div class="form-group">
+        <label class="form-label">Status Akuisisi</label>
+        <select class="form-control" id="gmo-akuisisi" onchange="state.gmo.akuisisi=this.value">
+          <option value="">Status Akuisisi...</option>
+          <option value="Sudah Terakuisisi">Sudah Terakuisisi</option>
+          <option value="Belum Terakuisisi">Belum Terakuisisi</option>
+        </select>
+      </div>
+    </div>`;
+  }
+
+  // Rating section (semua platform)
+  html += `<div class="section-block">
+    <div class="section-title">Rating ${GMO_LABEL[sub]}</div>
+    <div class="gmo-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Rating Saat Ini</label>
+        <input type="number" step="0.1" min="0" max="5" class="form-control" id="gmo-rating" placeholder="Contoh: 4.4" oninput="onGmoRatingInput()">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Target Rating</label>
+        <input type="number" step="0.1" min="0" max="5" class="form-control" id="gmo-target" placeholder="Contoh: 4.5" oninput="onGmoRatingInput()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jumlah Ulasan</label>
+      <input type="number" min="0" class="form-control" id="gmo-reviewer" placeholder="Contoh: 100" oninput="onGmoRatingInput()">
+    </div>
+    <div class="gmo-info-box" id="gmo-info" style="display:none;">
+      Bintang 5 diperlukan: <strong id="gmo-bintang5">--</strong>
+    </div>
+  </div>`;
+
+  // Komplain section
+  html += `<div class="section-block">
+    <div class="section-title">Komplain Terbaru</div>
+    <div class="komplain-list" id="komplain-list"></div>
+  </div>`;
+
+  // Skor Outlet & Menu (untuk shopee/gofood/grab)
+  if (sub === 'shopee' || sub === 'gofood' || sub === 'grab') {
+    html += `<div class="section-block">
+      <div class="section-title">Skor Outlet</div>
+      <div class="form-group">
+        <label class="form-label">Skor Outlet</label>
+        <input type="number" step="0.01" class="form-control" id="gmo-skor" placeholder="Contoh: 80" oninput="state.gmo.skor=this.value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keterangan Skor Outlet</label>
+        <textarea class="score-keterangan" style="min-height:60px;" id="gmo-skor-ket" placeholder="Keterangan opsional..." oninput="state.gmo.skorKet=this.value"></textarea>
+      </div>
+    </div>`;
+
+    html += `<div class="section-block">
+      <div class="section-title">Semua Menu Tersedia</div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" id="gmo-menu" onchange="state.gmo.menu=this.value">
+          <option value="">Status Menu...</option>
+          <option value="Ya">Ya</option>
+          <option value="Tidak">Tidak</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keterangan Menu</label>
+        <textarea class="score-keterangan" style="min-height:60px;" id="gmo-menu-ket" placeholder="Keterangan opsional..." oninput="state.gmo.menuKet=this.value"></textarea>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('gmo-content').innerHTML = html;
+  renderKomplainList();
+}
+
+function renderKomplainList() {
+  const list = document.getElementById('komplain-list');
+  if (!list) return;
+  const komplain = state.gmo.komplain || [''];
+  list.innerHTML = komplain.map((val, idx) => `
+    <div class="komplain-item">
+      <textarea class="score-keterangan" style="min-height:60px;" placeholder="Komplain ke-${idx+1} (opsional)..." oninput="onKomplainInput(${idx},this.value)">${val.replace(/</g,'&lt;')}</textarea>
+    </div>
+  `).join('');
+}
+
+function onKomplainInput(idx, val) {
+  state.gmo.komplain[idx] = val;
+  // Jika terisi dan ini adalah kolom terakhir, tambahkan kolom baru
+  const last = state.gmo.komplain.length - 1;
+  if (idx === last && val.trim() !== '') {
+    state.gmo.komplain.push('');
+    // Re-render sambil pertahankan focus
+    const currentTextarea = document.activeElement;
+    const cursorPos = currentTextarea ? currentTextarea.selectionStart : 0;
+    renderKomplainList();
+    const list = document.getElementById('komplain-list');
+    const textareas = list.querySelectorAll('textarea');
+    if (textareas[idx]) {
+      textareas[idx].focus();
+      try { textareas[idx].setSelectionRange(cursorPos, cursorPos); } catch(e){}
+    }
+  }
+}
+
+function onGmoRatingInput() {
+  const rating = parseFloat(document.getElementById('gmo-rating').value);
+  const target = parseFloat(document.getElementById('gmo-target').value);
+  const reviewer = parseInt(document.getElementById('gmo-reviewer').value);
+  state.gmo.rating = rating;
+  state.gmo.target = target;
+  state.gmo.reviewer = reviewer;
+
+  const info = document.getElementById('gmo-info');
+  const bintangEl = document.getElementById('gmo-bintang5');
+  if (isNaN(rating) || isNaN(target) || isNaN(reviewer) || reviewer <= 0) {
+    info.style.display = 'none';
+    return;
+  }
+  info.style.display = 'block';
+  if (rating >= target) {
+    bintangEl.textContent = 'Target sudah tercapai';
+    state.gmo.bintang5 = 'Target sudah tercapai';
+  } else if (target >= 5) {
+    bintangEl.textContent = 'Target tidak valid';
+    state.gmo.bintang5 = null;
+  } else {
+    const val = (reviewer * (target - rating)) / (5 - target);
+    const rounded = Math.ceil(val);
+    bintangEl.textContent = rounded + ' ulasan';
+    state.gmo.bintang5 = rounded;
+  }
+}
+
+function resetGmo() {
+  buildGmoUI();
+  showToast('Semua nilai dikosongkan');
+}
+
+function lanjutGmo() {
+  // Validasi minimal: untuk gmaps wajib akuisisi. Selain itu opsional.
+  if (state.subSelected === 'gmaps') {
+    if (!state.gmo.akuisisi) { showToast('Pilih status akuisisi'); return; }
+  }
+  buildResultsGmo();
   goTo('hasil');
 }
 
 // ===== RESULTS =====
 const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-
 function formatTanggal(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return `${HARI[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')}/${BULAN[d.getMonth()]}/${d.getFullYear()}`;
 }
-
 function getKategori(pct) {
   if (pct >= 100) return 'Sempurna';
-  if (pct >= 99) return 'Sempurna';
   if (pct >= 74) return 'Sangat Baik';
   if (pct >= 49) return 'Baik';
   if (pct >= 24) return 'Cukup';
@@ -1007,7 +1599,8 @@ function getKategori(pct) {
   return 'Sangat Kurang Baik';
 }
 
-function buildResults() {
+// ---- Scoring result (7langkah/doublecheck) ----
+function buildResultsScoring() {
   const data = getDataForJenis();
   let idx = 0;
   let grandTotal = 0;
@@ -1033,14 +1626,11 @@ function buildResults() {
   const pctDisplay = Number.isInteger(pctRounded) ? pctRounded + '%' : pctRounded.toFixed(2) + '%';
   const kategori = getKategori(pctRounded);
 
-  // Header
   document.getElementById('result-pct').textContent = pctDisplay;
   document.getElementById('result-label').textContent = kategori;
+  document.getElementById('result-subtitle').textContent = state.jenisSelected === '7langkah' ? '7 Langkah Pelayanan' : 'Double Check Order';
 
-  // Body
   let html = '';
-
-  // Summary
   const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' : 'Nama Kasir';
   html += `<div class="result-summary">
     <div class="result-summary-row"><span class="result-summary-key">Nama Toko</span><span class="result-summary-val">${state.tokoSelected}</span></div>
@@ -1049,7 +1639,6 @@ function buildResults() {
     <div class="result-summary-row"><span class="result-summary-key">Jam</span><span class="result-summary-val">${state.jam}</span></div>
   </div>`;
 
-  // Sections
   sections.forEach(sec => {
     const itemCount = sec.items.length;
     const totalSkor = sec.items.reduce((s, it) => s + it.skor, 0);
@@ -1071,15 +1660,14 @@ function buildResults() {
     });
     html += `</div></div>`;
   });
-
   html += `<div style="height:16px;"></div>`;
   document.getElementById('result-body').innerHTML = html;
 
-  // Store for copy/share
-  state.resultText = buildPlainText(sections, pctDisplay, kategori);
+  state.resultData = { type: 'scoring', sections, pctDisplay, kategori };
+  state.resultText = buildPlainTextScoring(sections, pctDisplay, kategori);
 }
 
-function buildPlainText(sections, pctDisplay, kategori) {
+function buildPlainTextScoring(sections, pctDisplay, kategori) {
   const judul = state.jenisSelected === '7langkah' ? '7 LANGKAH PELAYANAN' : 'DOUBLE CHECK ORDER';
   const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' : 'Nama Kasir';
   let txt = `PENILAIAN ${judul}\n\n`;
@@ -1087,7 +1675,6 @@ function buildPlainText(sections, pctDisplay, kategori) {
   txt += `${kasirLabel.padEnd(13)}: ${state.kasir}\n`;
   txt += `Hari/Tanggal : ${formatTanggal(state.tanggal)}\n`;
   txt += `Jam          : ${state.jam}\n\n`;
-
   sections.forEach(sec => {
     const totalSkor = sec.items.reduce((s, it) => s + it.skor, 0);
     const totalMax = sec.items.length * 5;
@@ -1097,9 +1684,202 @@ function buildPlainText(sections, pctDisplay, kategori) {
       if (item.ket) txt += `"${item.ket}"\n`;
     });
   });
-
   txt += `\n\nPOIN      : ${pctDisplay}\nKATEGORI  : ${kategori}`;
   return txt;
+}
+
+// ---- Checklist result (Kebersihan) ----
+function buildResultsChecklist() {
+  const area = DATA_KEBERSIHAN[state.subSelected];
+  let grandTotal = 0;
+  let grandMax = 0;
+  const items = area.items.map((item, idx) => {
+    const key = 'chk_' + idx;
+    const val = state.checklist[key];
+    const skor = val === 'yes' ? item.bobot : 0;
+    grandTotal += skor;
+    grandMax += item.bobot;
+    return { name: item.name, bobot: item.bobot, val, skor, ket: state.checkKeterangan[key] || '' };
+  });
+
+  const pctRounded = Math.round(grandTotal * 100) / 100;
+  const pctDisplay = Number.isInteger(pctRounded) ? pctRounded + '%' : pctRounded.toFixed(2) + '%';
+  const kategori = getKategori(pctRounded);
+
+  document.getElementById('result-pct').textContent = pctDisplay;
+  document.getElementById('result-label').textContent = kategori;
+  document.getElementById('result-subtitle').textContent = 'Kebersihan - ' + area.label;
+
+  let html = `<div class="result-summary">
+    <div class="result-summary-row"><span class="result-summary-key">Nama Toko</span><span class="result-summary-val">${state.tokoSelected}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Nama Auditor</span><span class="result-summary-val">${state.kasir}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Hari/Tanggal</span><span class="result-summary-val">${formatTanggal(state.tanggal)}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Jam</span><span class="result-summary-val">${state.jam}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Area</span><span class="result-summary-val">${area.label}</span></div>
+  </div>`;
+
+  html += `<div class="result-section">
+    <div class="result-section-header">
+      <span class="result-section-title">${area.label.toUpperCase()}</span>
+      <span class="result-section-score">${grandTotal}/${grandMax}</span>
+    </div>
+    <div class="result-section-items">`;
+  items.forEach(it => {
+    html += `<div class="result-item">
+      <div class="result-item-row">
+        <span class="result-item-name">- ${it.name}</span>
+        <span class="result-item-score">[${it.skor}/${it.bobot}]</span>
+      </div>`;
+    if (it.ket) html += `<div class="result-item-ket">"${it.ket}"</div>`;
+    html += `</div>`;
+  });
+  html += `</div></div><div style="height:16px;"></div>`;
+  document.getElementById('result-body').innerHTML = html;
+
+  state.resultData = { type: 'checklist', area, items, grandTotal, grandMax, pctDisplay, kategori };
+  state.resultText = buildPlainTextChecklist(area, items, grandTotal, grandMax, pctDisplay, kategori);
+}
+
+function buildPlainTextChecklist(area, items, grandTotal, grandMax, pctDisplay, kategori) {
+  let txt = `PENILAIAN KEBERSIHAN - ${area.label.toUpperCase()}\n\n`;
+  txt += `Nama Toko    : ${state.tokoSelected}\n`;
+  txt += `Nama Auditor : ${state.kasir}\n`;
+  txt += `Hari/Tanggal : ${formatTanggal(state.tanggal)}\n`;
+  txt += `Jam          : ${state.jam}\n`;
+  txt += `Area         : ${area.label}\n\n`;
+  txt += `\n${area.label.toUpperCase()} [${grandTotal}/${grandMax}]\n`;
+  items.forEach(it => {
+    txt += `- ${it.name} [${it.skor}/${it.bobot}]\n`;
+    if (it.ket) txt += `"${it.ket}"\n`;
+  });
+  txt += `\n\nPOIN      : ${pctDisplay}\nKATEGORI  : ${kategori}`;
+  return txt;
+}
+
+// ---- GMO result ----
+function buildResultsGmo() {
+  const sub = state.subSelected;
+  const platformLabel = GMO_LABEL[sub];
+
+  // Hide percentage/kategori: gunakan header berbeda
+  document.getElementById('result-pct').textContent = platformLabel;
+  document.getElementById('result-pct').style.fontSize = '32px';
+  document.getElementById('result-label').textContent = 'Ringkasan Penilaian';
+  document.getElementById('result-subtitle').textContent = '';
+
+  let html = `<div class="result-summary">
+    <div class="result-summary-row"><span class="result-summary-key">Nama Toko</span><span class="result-summary-val">${state.tokoSelected}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Nama Auditor</span><span class="result-summary-val">${state.kasir}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Hari/Tanggal</span><span class="result-summary-val">${formatTanggal(state.tanggal)}</span></div>
+    <div class="result-summary-row"><span class="result-summary-key">Jam</span><span class="result-summary-val">${state.jam}</span></div>
+  </div>`;
+
+  const g = state.gmo;
+
+  if (sub === 'gmaps') {
+    html += `<div class="result-section">
+      <div class="result-section-header">
+        <span class="result-section-title">Akuisisi Google Maps</span>
+      </div>
+      <div class="result-section-items">
+        <div class="result-item"><div class="result-item-row">
+          <span class="result-item-name">${g.akuisisi || '-'}</span>
+        </div></div>
+      </div>
+    </div>`;
+  }
+
+  // Rating section
+  html += `<div class="result-section">
+    <div class="result-section-header">
+      <span class="result-section-title">${platformLabel}</span>
+    </div>
+    <div class="result-section-items">`;
+  if (!isNaN(g.target)) html += `<div class="result-item"><div class="result-item-row"><span class="result-item-name">Target Rating</span><span class="result-item-score">${g.target}</span></div></div>`;
+  if (!isNaN(g.rating) && !isNaN(g.reviewer)) html += `<div class="result-item"><div class="result-item-row"><span class="result-item-name">Rating</span><span class="result-item-score">${g.rating} dari ${g.reviewer} review</span></div></div>`;
+  if (g.bintang5 !== undefined && g.bintang5 !== null) {
+    const b5text = typeof g.bintang5 === 'number' ? g.bintang5 + ' ulasan' : g.bintang5;
+    html += `<div class="result-item"><div class="result-item-row"><span class="result-item-name">Bintang 5 diperlukan</span><span class="result-item-score">${b5text}</span></div></div>`;
+  }
+  // Komplain
+  const komplainFilled = (g.komplain || []).filter(k => k.trim() !== '');
+  if (komplainFilled.length > 0) {
+    html += `<div class="result-item"><div class="result-item-row"><span class="result-item-name" style="font-weight:600;">Komplain Terbaru:</span></div>`;
+    komplainFilled.forEach(k => {
+      html += `<div class="result-item-ket">"${k.replace(/</g,'&lt;')}"</div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div></div>`;
+
+  // Skor & Menu untuk shopee/gofood/grab
+  if (sub === 'shopee' || sub === 'gofood' || sub === 'grab') {
+    if (g.skor || g.skorKet) {
+      html += `<div class="result-section">
+        <div class="result-section-header">
+          <span class="result-section-title">Skor Outlet</span>
+        </div>
+        <div class="result-section-items">`;
+      if (g.skor) html += `<div class="result-item"><div class="result-item-row"><span class="result-item-name">Skor Outlet</span><span class="result-item-score">${g.skor}</span></div></div>`;
+      if (g.skorKet) html += `<div class="result-item"><div class="result-item-ket">"${g.skorKet.replace(/</g,'&lt;')}"</div></div>`;
+      html += `</div></div>`;
+    }
+    if (g.menu || g.menuKet) {
+      html += `<div class="result-section">
+        <div class="result-section-header">
+          <span class="result-section-title">Semua Menu Tersedia</span>
+        </div>
+        <div class="result-section-items">`;
+      if (g.menu) html += `<div class="result-item"><div class="result-item-row"><span class="result-item-name">Status</span><span class="result-item-score">${g.menu}</span></div></div>`;
+      if (g.menuKet) html += `<div class="result-item"><div class="result-item-ket">"${g.menuKet.replace(/</g,'&lt;')}"</div></div>`;
+      html += `</div></div>`;
+    }
+  }
+
+  html += `<div style="height:16px;"></div>`;
+  document.getElementById('result-body').innerHTML = html;
+
+  state.resultData = { type: 'gmo', sub, platformLabel, g, komplainFilled };
+  state.resultText = buildPlainTextGmo(sub, platformLabel, g, komplainFilled);
+}
+
+function buildPlainTextGmo(sub, platformLabel, g, komplainFilled) {
+  let txt = `PENILAIAN ${platformLabel.toUpperCase()}\n\n`;
+  txt += `Nama Toko    : ${state.tokoSelected}\n`;
+  txt += `Nama Auditor : ${state.kasir}\n`;
+  txt += `Hari/Tanggal : ${formatTanggal(state.tanggal)}\n`;
+  txt += `Jam          : ${state.jam}\n\n`;
+
+  if (sub === 'gmaps') {
+    txt += `\nAkuisisi Google Maps\n${g.akuisisi || '-'}\n`;
+  }
+
+  txt += `\n${platformLabel}\n`;
+  if (!isNaN(g.target)) txt += `Target Rating ${g.target}\n`;
+  if (!isNaN(g.rating) && !isNaN(g.reviewer)) txt += `Rating ${g.rating} dari ${g.reviewer} review\n`;
+  if (g.bintang5 !== undefined && g.bintang5 !== null) {
+    const b5text = typeof g.bintang5 === 'number' ? g.bintang5 + ' ulasan' : g.bintang5;
+    txt += `Bintang 5 yang diperlukan : ${b5text}\n`;
+  }
+  komplainFilled.forEach(k => { txt += `"${k}"\n`; });
+
+  if (sub === 'shopee' || sub === 'gofood' || sub === 'grab') {
+    if (g.skor) {
+      txt += `Skor Outlet : ${g.skor}\n`;
+      if (g.skorKet) txt += `"${g.skorKet}"\n`;
+    }
+    if (g.menu) {
+      txt += `Menu : ${g.menu}\n`;
+      if (g.menuKet) txt += `"${g.menuKet}"\n`;
+    }
+  }
+
+  return txt;
+}
+
+// Reset pct style for non-gmo
+function resetResultPctStyle() {
+  document.getElementById('result-pct').style.fontSize = '';
 }
 
 // ===== COPY & SHARE =====
@@ -1107,7 +1887,6 @@ function salinHasil() {
   if (!state.resultText) return;
   copyToClipboard(state.resultText).then(() => showToast('Disalin ke clipboard'));
 }
-
 function shareTelegram() {
   if (!state.resultText) return;
   copyToClipboard(state.resultText).then(() => {
@@ -1119,19 +1898,12 @@ function shareTelegram() {
     iframe.style.display = 'none';
     document.body.appendChild(iframe);
     iframe.src = appUrl;
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 2000);
-    setTimeout(() => {
-      window.open(webUrl, '_blank');
-    }, 1500);
+    setTimeout(() => { document.body.removeChild(iframe); }, 2000);
+    setTimeout(() => { window.open(webUrl, '_blank'); }, 1500);
   });
 }
-
 function copyToClipboard(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text);
-  }
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
   return new Promise((resolve) => {
     const ta = document.createElement('textarea');
     ta.value = text;
@@ -1142,6 +1914,227 @@ function copyToClipboard(text) {
     document.body.removeChild(ta);
     resolve();
   });
+}
+
+// ===== EXPORT =====
+function openExportModal() {
+  document.getElementById('export-modal').classList.add('show');
+}
+function closeExportModal() {
+  document.getElementById('export-modal').classList.remove('show');
+}
+function exportAs(fmt) {
+  closeExportModal();
+  if (fmt === 'excel') exportExcel();
+  else if (fmt === 'pdf') exportPdf();
+  else if (fmt === 'md') exportMd();
+}
+
+function getFilenameBase() {
+  const d = state.resultData;
+  const dateStr = state.tanggal ? state.tanggal.replace(/-/g,'') : '';
+  let title = 'Penilaian';
+  if (!d) return title + '_' + dateStr;
+  if (d.type === 'scoring') title = state.jenisSelected === '7langkah' ? '7-Langkah-Pelayanan' : 'Double-Check-Order';
+  else if (d.type === 'checklist') title = 'Kebersihan-' + d.area.label.replace(/\s+/g,'-');
+  else if (d.type === 'gmo') title = d.platformLabel.replace(/\s+/g,'-');
+  return `${title}_${state.tokoSelected.replace(/\s+/g,'-')}_${dateStr}`;
+}
+
+function exportExcel() {
+  const d = state.resultData;
+  if (!d) return;
+  const wb = XLSX.utils.book_new();
+  const rows = [];
+  const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' :
+                     (state.jenisSelected === 'kebersihan' || state.jenisSelected === 'gmo') ? 'Nama Auditor' : 'Nama Kasir';
+
+  if (d.type === 'scoring') {
+    rows.push(['PENILAIAN', state.jenisSelected === '7langkah' ? '7 Langkah Pelayanan' : 'Double Check Order']);
+    rows.push(['Nama Toko', state.tokoSelected]);
+    rows.push([kasirLabel, state.kasir]);
+    rows.push(['Hari/Tanggal', formatTanggal(state.tanggal)]);
+    rows.push(['Jam', state.jam]);
+    rows.push([]);
+    rows.push(['Section', 'Item', 'Skor', 'Max', 'Bobot', 'Keterangan']);
+    d.sections.forEach(sec => {
+      sec.items.forEach(it => {
+        rows.push([sec.section, it.name, it.skor, 5, Math.round(it.bobot*100)/100, it.ket]);
+      });
+    });
+    rows.push([]);
+    rows.push(['POIN', d.pctDisplay]);
+    rows.push(['KATEGORI', d.kategori]);
+  } else if (d.type === 'checklist') {
+    rows.push(['PENILAIAN', 'Kebersihan - ' + d.area.label]);
+    rows.push(['Nama Toko', state.tokoSelected]);
+    rows.push(['Nama Auditor', state.kasir]);
+    rows.push(['Hari/Tanggal', formatTanggal(state.tanggal)]);
+    rows.push(['Jam', state.jam]);
+    rows.push(['Area', d.area.label]);
+    rows.push([]);
+    rows.push(['Section', 'Item', 'Status', 'Skor', 'Bobot', 'Keterangan']);
+    d.items.forEach(it => {
+      rows.push([d.area.label, it.name, it.val === 'yes' ? 'Ya' : 'Tidak', it.skor, it.bobot, it.ket]);
+    });
+    rows.push([]);
+    rows.push(['Total', d.grandTotal + '/' + d.grandMax]);
+    rows.push(['POIN', d.pctDisplay]);
+    rows.push(['KATEGORI', d.kategori]);
+  } else if (d.type === 'gmo') {
+    const g = d.g;
+    rows.push(['PENILAIAN', d.platformLabel]);
+    rows.push(['Nama Toko', state.tokoSelected]);
+    rows.push(['Nama Auditor', state.kasir]);
+    rows.push(['Hari/Tanggal', formatTanggal(state.tanggal)]);
+    rows.push(['Jam', state.jam]);
+    rows.push([]);
+    if (d.sub === 'gmaps') {
+      rows.push(['Akuisisi Google Maps', g.akuisisi || '-']);
+      rows.push([]);
+    }
+    rows.push(['Kategori', 'Nilai']);
+    if (!isNaN(g.target)) rows.push(['Target Rating', g.target]);
+    if (!isNaN(g.rating)) rows.push(['Rating Saat Ini', g.rating]);
+    if (!isNaN(g.reviewer)) rows.push(['Jumlah Ulasan', g.reviewer]);
+    if (g.bintang5 !== undefined && g.bintang5 !== null) {
+      const b5text = typeof g.bintang5 === 'number' ? g.bintang5 + ' ulasan' : g.bintang5;
+      rows.push(['Bintang 5 Diperlukan', b5text]);
+    }
+    if (d.komplainFilled.length > 0) {
+      rows.push([]);
+      rows.push(['Komplain Terbaru']);
+      d.komplainFilled.forEach((k, i) => rows.push([`Komplain ${i+1}`, k]));
+    }
+    if (d.sub !== 'gmaps') {
+      rows.push([]);
+      if (g.skor) rows.push(['Skor Outlet', g.skor]);
+      if (g.skorKet) rows.push(['Keterangan Skor', g.skorKet]);
+      if (g.menu) rows.push(['Semua Menu Tersedia', g.menu]);
+      if (g.menuKet) rows.push(['Keterangan Menu', g.menuKet]);
+    }
+  }
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 22 }, { wch: 40 }, { wch: 10 }, { wch: 8 }, { wch: 10 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, ws, 'Penilaian');
+  XLSX.writeFile(wb, getFilenameBase() + '.xlsx');
+  showToast('Excel berhasil di-download');
+}
+
+function exportPdf() {
+  const target = document.getElementById('result-capture-area');
+  showToast('Membuat PDF...');
+  html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    pdf.save(getFilenameBase() + '.pdf');
+    showToast('PDF berhasil di-download');
+  }).catch(err => {
+    console.error(err);
+    showToast('Gagal membuat PDF');
+  });
+}
+
+function exportMd() {
+  const d = state.resultData;
+  if (!d) return;
+  let md = '';
+  const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' :
+                     (state.jenisSelected === 'kebersihan' || state.jenisSelected === 'gmo') ? 'Nama Auditor' : 'Nama Kasir';
+
+  if (d.type === 'scoring') {
+    const judul = state.jenisSelected === '7langkah' ? '7 Langkah Pelayanan' : 'Double Check Order';
+    md += `# Penilaian ${judul}\n\n`;
+    md += `- **Nama Toko:** ${state.tokoSelected}\n`;
+    md += `- **${kasirLabel}:** ${state.kasir}\n`;
+    md += `- **Hari/Tanggal:** ${formatTanggal(state.tanggal)}\n`;
+    md += `- **Jam:** ${state.jam}\n\n`;
+    d.sections.forEach(sec => {
+      const totalSkor = sec.items.reduce((s, it) => s + it.skor, 0);
+      const totalMax = sec.items.length * 5;
+      md += `## ${sec.section} [${totalSkor}/${totalMax}]\n\n`;
+      sec.items.forEach(it => {
+        md += `- ${it.name} **[${it.skor}/5]**\n`;
+        if (it.ket) md += `  > "${it.ket}"\n`;
+      });
+      md += '\n';
+    });
+    md += `---\n\n**POIN:** ${d.pctDisplay}  \n**KATEGORI:** ${d.kategori}\n`;
+  } else if (d.type === 'checklist') {
+    md += `# Penilaian Kebersihan - ${d.area.label}\n\n`;
+    md += `- **Nama Toko:** ${state.tokoSelected}\n`;
+    md += `- **Nama Auditor:** ${state.kasir}\n`;
+    md += `- **Hari/Tanggal:** ${formatTanggal(state.tanggal)}\n`;
+    md += `- **Jam:** ${state.jam}\n`;
+    md += `- **Area:** ${d.area.label}\n\n`;
+    md += `## ${d.area.label.toUpperCase()} [${d.grandTotal}/${d.grandMax}]\n\n`;
+    d.items.forEach(it => {
+      const box = it.val === 'yes' ? '[x]' : '[ ]';
+      md += `- ${box} ${it.name} **[${it.skor}/${it.bobot}]**\n`;
+      if (it.ket) md += `  > "${it.ket}"\n`;
+    });
+    md += `\n---\n\n**POIN:** ${d.pctDisplay}  \n**KATEGORI:** ${d.kategori}\n`;
+  } else if (d.type === 'gmo') {
+    const g = d.g;
+    md += `# Penilaian ${d.platformLabel}\n\n`;
+    md += `- **Nama Toko:** ${state.tokoSelected}\n`;
+    md += `- **Nama Auditor:** ${state.kasir}\n`;
+    md += `- **Hari/Tanggal:** ${formatTanggal(state.tanggal)}\n`;
+    md += `- **Jam:** ${state.jam}\n\n`;
+    if (d.sub === 'gmaps') {
+      md += `## Akuisisi Google Maps\n\n${g.akuisisi || '-'}\n\n`;
+    }
+    md += `## ${d.platformLabel}\n\n`;
+    if (!isNaN(g.target)) md += `- **Target Rating:** ${g.target}\n`;
+    if (!isNaN(g.rating) && !isNaN(g.reviewer)) md += `- **Rating:** ${g.rating} dari ${g.reviewer} review\n`;
+    if (g.bintang5 !== undefined && g.bintang5 !== null) {
+      const b5text = typeof g.bintang5 === 'number' ? g.bintang5 + ' ulasan' : g.bintang5;
+      md += `- **Bintang 5 diperlukan:** ${b5text}\n`;
+    }
+    if (d.komplainFilled.length > 0) {
+      md += `\n### Komplain Terbaru\n\n`;
+      d.komplainFilled.forEach(k => md += `- "${k}"\n`);
+    }
+    if (d.sub !== 'gmaps') {
+      if (g.skor || g.skorKet) {
+        md += `\n## Skor Outlet\n\n`;
+        if (g.skor) md += `- **Skor:** ${g.skor}\n`;
+        if (g.skorKet) md += `  > "${g.skorKet}"\n`;
+      }
+      if (g.menu || g.menuKet) {
+        md += `\n## Semua Menu Tersedia\n\n`;
+        if (g.menu) md += `- **Status:** ${g.menu}\n`;
+        if (g.menuKet) md += `  > "${g.menuKet}"\n`;
+      }
+    }
+  }
+
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = getFilenameBase() + '.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Markdown berhasil di-download');
 }
 
 // ===== TOAST =====
@@ -1160,9 +2153,22 @@ function showToast(msg) {
   }, 2500);
 }
 
+// Reset result pct font-size when leaving hasil for gmo
+const origGoTo = goTo;
+window.goTo = function(screen) {
+  if (screen !== 'hasil') {
+    resetResultPctStyle();
+  }
+  origGoTo(screen);
+};
+
+// Close export modal on overlay click
+document.getElementById('export-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeExportModal();
+});
+
 // ===== INIT =====
 (function init() {
-  // Set today's date and current time as defaults
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth()+1).padStart(2,'0');
@@ -1171,8 +2177,6 @@ function showToast(msg) {
   const min = String(now.getMinutes()).padStart(2,'0');
   document.getElementById('tanggal-input').value = `${yyyy}-${mm}-${dd}`;
   document.getElementById('jam-input').value = `${hh}:${min}`;
-
-  // Populate dropdown initially
   renderDropdownList('');
 })();
 </script>
