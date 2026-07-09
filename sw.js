@@ -1,4 +1,4 @@
-const CACHE_NAME = "takbiran-v3";
+const CACHE_NAME = "takbiran-v4";
 const FILES_TO_CACHE = [
     "./",
     "./index.html",
