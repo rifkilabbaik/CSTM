@@ -565,8 +565,8 @@
   }
   .result-footer-btns {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     padding: 16px 20px;
     border-top: 1px solid var(--border);
     background: var(--surface);
@@ -574,8 +574,8 @@
     bottom: 0;
   }
   .result-footer-btns .btn {
-    font-size: 12px;
-    padding: 11px 4px;
+    font-size: 13px;
+    padding: 12px 6px;
   }
 
   /* MODAL / POPUP */
@@ -880,8 +880,7 @@ if ("serviceWorker" in navigator) {
     <div class="result-footer-btns">
       <button class="btn btn-secondary" onclick="goTo('main')">Menu</button>
       <button class="btn btn-outline" onclick="salinHasil()">Salin</button>
-      <button class="btn btn-primary" onclick="shareTelegram()">Telegram</button>
-      <button class="btn btn-outline" onclick="openExportModal()">Export</button>
+      <button class="btn btn-primary" onclick="openExportModal()">Export</button>
     </div>
   </div>
 
@@ -1277,7 +1276,46 @@ function selectToko(name) {
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('toko-dropdown-wrap');
   if (wrap && !wrap.contains(e.target)) closeDropdown();
+  // Close custom gmo dropdowns when clicking outside
+  ['akuisisi','menu'].forEach(id => {
+    const w = document.getElementById(id + '-wrap');
+    if (w && !w.contains(e.target)) closeCustomDropdown(id);
+  });
 });
+
+function toggleCustomDropdown(id) {
+  const list = document.getElementById(id + '-list');
+  const arrow = document.getElementById(id + '-arrow');
+  if (!list) return;
+  const isOpen = list.classList.contains('open');
+  // Close all other custom dropdowns first
+  ['akuisisi','menu'].forEach(other => {
+    if (other !== id) closeCustomDropdown(other);
+  });
+  if (isOpen) {
+    list.classList.remove('open');
+    arrow.classList.remove('open');
+  } else {
+    list.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+function closeCustomDropdown(id) {
+  const list = document.getElementById(id + '-list');
+  const arrow = document.getElementById(id + '-arrow');
+  if (list) list.classList.remove('open');
+  if (arrow) arrow.classList.remove('open');
+}
+function selectCustomOption(id, value, field) {
+  const input = document.getElementById(id + '-input');
+  if (input) input.value = value;
+  state.gmo[field] = value;
+  // Mark selected item
+  document.querySelectorAll(`#${id}-list .dropdown-item`).forEach(el => {
+    el.classList.toggle('selected', el.textContent === value);
+  });
+  closeCustomDropdown(id);
+}
 
 // ===== FORM =====
 function initFormDefaults() {
@@ -1463,11 +1501,16 @@ function buildGmoUI() {
       <div class="section-title">Akuisisi Google Maps</div>
       <div class="form-group">
         <label class="form-label">Status Akuisisi</label>
-        <select class="form-control" id="gmo-akuisisi" onchange="state.gmo.akuisisi=this.value">
-          <option value="">Status Akuisisi...</option>
-          <option value="Sudah Terakuisisi">Sudah Terakuisisi</option>
-          <option value="Belum Terakuisisi">Belum Terakuisisi</option>
-        </select>
+        <div class="dropdown-wrap" id="akuisisi-wrap">
+          <div class="dropdown-input-wrap" onclick="toggleCustomDropdown('akuisisi')">
+            <input type="text" class="form-control" id="akuisisi-input" placeholder="Status Akuisisi..." readonly style="cursor:pointer;">
+            <svg class="dropdown-arrow" id="akuisisi-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dropdown-list" id="akuisisi-list">
+            <div class="dropdown-item" onclick="selectCustomOption('akuisisi','Sudah Terakuisisi','akuisisi')">Sudah Terakuisisi</div>
+            <div class="dropdown-item" onclick="selectCustomOption('akuisisi','Belum Terakuisisi','akuisisi')">Belum Terakuisisi</div>
+          </div>
+        </div>
       </div>
     </div>`;
   }
@@ -1518,11 +1561,16 @@ function buildGmoUI() {
       <div class="section-title">Semua Menu Tersedia</div>
       <div class="form-group">
         <label class="form-label">Status</label>
-        <select class="form-control" id="gmo-menu" onchange="state.gmo.menu=this.value">
-          <option value="">Status Menu...</option>
-          <option value="Ya">Ya</option>
-          <option value="Tidak">Tidak</option>
-        </select>
+        <div class="dropdown-wrap" id="menu-wrap">
+          <div class="dropdown-input-wrap" onclick="toggleCustomDropdown('menu')">
+            <input type="text" class="form-control" id="menu-input" placeholder="Status Menu..." readonly style="cursor:pointer;">
+            <svg class="dropdown-arrow" id="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dropdown-list" id="menu-list">
+            <div class="dropdown-item" onclick="selectCustomOption('menu','Ya','menu')">Ya</div>
+            <div class="dropdown-item" onclick="selectCustomOption('menu','Tidak','menu')">Tidak</div>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Keterangan Menu</label>
@@ -1912,21 +1960,6 @@ function salinHasil() {
   if (!state.resultText) return;
   copyToClipboard(state.resultText).then(() => showToast('Disalin ke clipboard'));
 }
-function shareTelegram() {
-  if (!state.resultText) return;
-  copyToClipboard(state.resultText).then(() => {
-    showToast('Disalin ke clipboard');
-    const encoded = encodeURIComponent(state.resultText);
-    const appUrl = 'tg://msg?text=' + encoded;
-    const webUrl = 'https://t.me/share/url?url=%20&text=' + encoded;
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    iframe.src = appUrl;
-    setTimeout(() => { document.body.removeChild(iframe); }, 2000);
-    setTimeout(() => { window.open(webUrl, '_blank'); }, 1500);
-  });
-}
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
   return new Promise((resolve) => {
@@ -1950,25 +1983,70 @@ function closeExportModal() {
 }
 function exportAs(fmt) {
   closeExportModal();
-  if (fmt === 'excel') exportExcel();
-  else if (fmt === 'pdf') exportPdf();
-  else if (fmt === 'md') exportMd();
+  exportAndShare(fmt);
 }
 
-function getFilenameBase() {
-  const d = state.resultData;
-  const dateStr = state.tanggal ? state.tanggal.replace(/-/g,'') : '';
-  let title = 'Penilaian';
-  if (!d) return title + '_' + dateStr;
-  if (d.type === 'scoring') title = state.jenisSelected === '7langkah' ? '7-Langkah-Pelayanan' : 'Double-Check-Order';
-  else if (d.type === 'checklist') title = 'Kebersihan-' + d.area.label.replace(/\s+/g,'-');
-  else if (d.type === 'gmo') title = d.platformLabel.replace(/\s+/g,'-');
-  return `${title}_${state.tokoSelected.replace(/\s+/g,'-')}_${dateStr}`;
+async function exportAndShare(fmt) {
+  const filename = getFilenameBase();
+  let file, mime, ext;
+  try {
+    if (fmt === 'excel') {
+      const wb = buildExcelWorkbook();
+      const ab = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      ext = '.xlsx';
+      file = new File([ab], filename + ext, { type: mime });
+    } else if (fmt === 'pdf') {
+      showToast('Membuat PDF...');
+      const blob = await buildPdfBlob();
+      mime = 'application/pdf';
+      ext = '.pdf';
+      file = new File([blob], filename + ext, { type: mime });
+    } else if (fmt === 'md') {
+      const md = buildMarkdownText();
+      mime = 'text/markdown';
+      ext = '.md';
+      file = new File([md], filename + ext, { type: mime });
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal membuat file');
+    return;
+  }
+
+  // Coba Web Share API dengan file
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: filename,
+      });
+      showToast('File berhasil dibagikan');
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user batal
+      console.error('Share error:', err);
+      // lanjut ke fallback download
+    }
+  }
+  // Fallback: download biasa
+  downloadFile(file);
+  showToast(fmt.toUpperCase() + ' berhasil di-download');
 }
 
-function exportExcel() {
+function downloadFile(file) {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function buildExcelWorkbook() {
   const d = state.resultData;
-  if (!d) return;
   const wb = XLSX.utils.book_new();
   const rows = [];
   const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' :
@@ -2042,43 +2120,37 @@ function exportExcel() {
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{ wch: 22 }, { wch: 40 }, { wch: 10 }, { wch: 8 }, { wch: 10 }, { wch: 40 }];
   XLSX.utils.book_append_sheet(wb, ws, 'Penilaian');
-  XLSX.writeFile(wb, getFilenameBase() + '.xlsx');
-  showToast('Excel berhasil di-download');
+  return wb;
 }
 
-function exportPdf() {
-  const target = document.getElementById('result-capture-area');
-  showToast('Membuat PDF...');
-  html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
+function buildPdfBlob() {
+  return new Promise((resolve, reject) => {
+    const target = document.getElementById('result-capture-area');
+    html2canvas(target, { scale: 2, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-    }
-    pdf.save(getFilenameBase() + '.pdf');
-    showToast('PDF berhasil di-download');
-  }).catch(err => {
-    console.error(err);
-    showToast('Gagal membuat PDF');
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      resolve(pdf.output('blob'));
+    }).catch(reject);
   });
 }
 
-function exportMd() {
+function buildMarkdownText() {
   const d = state.resultData;
-  if (!d) return;
   let md = '';
   const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' :
                      (state.jenisSelected === 'kebersihan' || state.jenisSelected === 'gmo') ? 'Nama Auditor' : 'Nama Kasir';
@@ -2149,18 +2221,20 @@ function exportMd() {
       }
     }
   }
-
-  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = getFilenameBase() + '.md';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('Markdown berhasil di-download');
+  return md;
 }
+
+function getFilenameBase() {
+  const d = state.resultData;
+  const dateStr = state.tanggal ? state.tanggal.replace(/-/g,'') : '';
+  let title = 'Penilaian';
+  if (!d) return title + '_' + dateStr;
+  if (d.type === 'scoring') title = state.jenisSelected === '7langkah' ? '7-Langkah-Pelayanan' : 'Double-Check-Order';
+  else if (d.type === 'checklist') title = 'Kebersihan-' + d.area.label.replace(/\s+/g,'-');
+  else if (d.type === 'gmo') title = d.platformLabel.replace(/\s+/g,'-');
+  return `${title}_${state.tokoSelected.replace(/\s+/g,'-')}_${dateStr}`;
+}
+
 
 // ===== TOAST =====
 function showToast(msg) {
