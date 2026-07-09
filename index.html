@@ -7,7 +7,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Takbiran - Cetak Biru Pelayanan</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -891,7 +890,6 @@ if ("serviceWorker" in navigator) {
   <div class="modal-box">
     <div class="modal-header">Pilih Format Export</div>
     <div class="modal-options">
-      <div class="modal-option" onclick="exportAs('excel')">Excel (.xlsx)</div>
       <div class="modal-option" onclick="exportAs('pdf')">PDF (.pdf)</div>
       <div class="modal-option" onclick="exportAs('md')">Markdown (.md)</div>
     </div>
@@ -2022,13 +2020,7 @@ async function exportAndShare(fmt) {
   const filename = getFilenameBase();
   let file, mime, ext;
   try {
-    if (fmt === 'excel') {
-      const wb = buildExcelWorkbook();
-      const ab = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      ext = '.xlsx';
-      file = new File([ab], filename + ext, { type: mime });
-    } else if (fmt === 'pdf') {
+    if (fmt === 'pdf') {
       showToast('Membuat PDF...');
       const blob = await buildPdfBlob();
       mime = 'application/pdf';
@@ -2036,7 +2028,7 @@ async function exportAndShare(fmt) {
       file = new File([blob], filename + ext, { type: mime });
     } else if (fmt === 'md') {
       const md = buildMarkdownText();
-      mime = 'text/plain';
+      mime = 'application/octet-stream';
       ext = '.md';
       file = new File([md], filename + ext, { type: mime });
     }
@@ -2075,84 +2067,6 @@ function downloadFile(file) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-function buildExcelWorkbook() {
-  const d = state.resultData;
-  const wb = XLSX.utils.book_new();
-  const rows = [];
-  const kasirLabel = state.jenisSelected === 'doublecheck' ? 'Nama Kasir/Server' :
-                     (state.jenisSelected === 'kebersihan' || state.jenisSelected === 'gmo') ? 'Nama Auditor' : 'Nama Kasir';
-
-  if (d.type === 'scoring') {
-    rows.push(['PENILAIAN', state.jenisSelected === '7langkah' ? '7 Langkah Pelayanan' : 'Double Check Order']);
-    rows.push(['Nama Toko', state.tokoSelected]);
-    rows.push([kasirLabel, state.kasir]);
-    rows.push(['Hari/Tanggal', formatTanggal(state.tanggal)]);
-    rows.push(['Jam', state.jam]);
-    rows.push([]);
-    rows.push(['Section', 'Item', 'Skor', 'Max', 'Bobot', 'Keterangan']);
-    d.sections.forEach(sec => {
-      sec.items.forEach(it => {
-        rows.push([sec.section, it.name, it.skor, 5, Math.round(it.bobot*100)/100, it.ket]);
-      });
-    });
-    rows.push([]);
-    rows.push(['POIN', d.pctDisplay]);
-    rows.push(['KATEGORI', d.kategori]);
-  } else if (d.type === 'checklist') {
-    rows.push(['PENILAIAN', 'Kebersihan - ' + d.area.label]);
-    rows.push(['Nama Toko', state.tokoSelected]);
-    rows.push(['Nama Auditor', state.kasir]);
-    rows.push(['Hari/Tanggal', formatTanggal(state.tanggal)]);
-    rows.push(['Jam', state.jam]);
-    rows.push(['Area', d.area.label]);
-    rows.push([]);
-    rows.push(['Section', 'Item', 'Status', 'Skor', 'Bobot', 'Keterangan']);
-    d.items.forEach(it => {
-      rows.push([d.area.label, it.name, it.val === 'yes' ? 'Ya' : 'Tidak', it.skor, it.bobot, it.ket]);
-    });
-    rows.push([]);
-    rows.push(['Total', d.grandTotal + '/' + d.grandMax]);
-    rows.push(['POIN', d.pctDisplay]);
-    rows.push(['KATEGORI', d.kategori]);
-  } else if (d.type === 'gmo') {
-    const g = d.g;
-    rows.push(['PENILAIAN', d.platformLabel]);
-    rows.push(['Nama Toko', state.tokoSelected]);
-    rows.push(['Nama Auditor', state.kasir]);
-    rows.push(['Hari/Tanggal', formatTanggal(state.tanggal)]);
-    rows.push(['Jam', state.jam]);
-    rows.push([]);
-    if (d.sub === 'gmaps') {
-      rows.push(['Akuisisi Google Maps', g.akuisisi || '-']);
-      rows.push([]);
-    }
-    rows.push(['Kategori', 'Nilai']);
-    if (!isNaN(g.target)) rows.push(['Target Rating', g.target]);
-    if (!isNaN(g.rating)) rows.push(['Rating Saat Ini', g.rating]);
-    if (!isNaN(g.reviewer)) rows.push(['Jumlah Ulasan', g.reviewer]);
-    if (g.bintang5 !== undefined && g.bintang5 !== null) {
-      const b5text = typeof g.bintang5 === 'number' ? g.bintang5 + ' ulasan' : g.bintang5;
-      rows.push(['Bintang 5 Diperlukan', b5text]);
-    }
-    if (d.komplainFilled.length > 0) {
-      rows.push([]);
-      rows.push(['Komplain Terbaru']);
-      d.komplainFilled.forEach((k, i) => rows.push([`Komplain ${i+1}`, k]));
-    }
-    if (d.sub !== 'gmaps') {
-      rows.push([]);
-      if (g.skor) rows.push(['Skor Outlet', g.skor]);
-      if (g.skorKet) rows.push(['Keterangan Skor', g.skorKet]);
-      if (g.menu) rows.push(['Semua Menu Tersedia', g.menu]);
-      if (g.menuKet) rows.push(['Keterangan Menu', g.menuKet]);
-    }
-  }
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{ wch: 22 }, { wch: 40 }, { wch: 10 }, { wch: 8 }, { wch: 10 }, { wch: 40 }];
-  XLSX.utils.book_append_sheet(wb, ws, 'Penilaian');
-  return wb;
 }
 
 function buildPdfBlob() {
