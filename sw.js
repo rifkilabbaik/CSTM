@@ -1,5 +1,4 @@
-const CACHE_NAME = "cstm-v1";
-
+const CACHE_NAME = "takbiran-v2";
 const FILES_TO_CACHE = [
     "./",
     "./index.html",
@@ -14,11 +13,10 @@ self.addEventListener("install", event => {
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(FILES_TO_CACHE))
     );
-
     self.skipWaiting();
 });
 
-// Activate
+// Activate — hapus cache lama
 self.addEventListener("activate", event => {
     event.waitUntil(
         caches.keys().then(keys =>
@@ -31,16 +29,47 @@ self.addEventListener("activate", event => {
             )
         )
     );
-
     self.clients.claim();
 });
 
-// Fetch
+// Fetch — Network-first untuk HTML, Cache-first untuk asset lain
 self.addEventListener("fetch", event => {
+    const req = event.request;
+    const url = new URL(req.url);
+
+    // Untuk navigasi (index.html, dokumen) → network dulu, fallback ke cache
+    if (req.mode === "navigate" || req.destination === "document" || url.pathname.endsWith(".html")) {
+        event.respondWith(
+            fetch(req)
+                .then(response => {
+                    // Update cache dengan versi baru
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+                    return response;
+                })
+                .catch(() => caches.match(req).then(r => r || caches.match("./index.html")))
+        );
+        return;
+    }
+
+    // Asset statis (icon, manifest, dll) → cache dulu, fallback network, lalu update cache di background
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
-            })
+        caches.match(req).then(cached => {
+            const networkFetch = fetch(req).then(response => {
+                if (response && response.status === 200) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+                }
+                return response;
+            }).catch(() => cached);
+            return cached || networkFetch;
+        })
     );
+});
+
+// Listener untuk pesan dari client (misal trigger skipWaiting manual)
+self.addEventListener("message", event => {
+    if (event.data && event.data.type === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
 });
