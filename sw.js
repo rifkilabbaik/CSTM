@@ -1,4 +1,4 @@
-const CACHE_NAME = "takbiran-v5";
+const CACHE_NAME = "takbiran-v6";
 const FILES_TO_CACHE = [
     "./",
     "./index.html",
@@ -6,7 +6,6 @@ const FILES_TO_CACHE = [
     "./icons/icon-152.png",
     "./icons/icon-512.png"
 ];
-
 // Install
 self.addEventListener("install", event => {
     event.waitUntil(
@@ -15,7 +14,6 @@ self.addEventListener("install", event => {
     );
     self.skipWaiting();
 });
-
 // Activate — hapus cache lama
 self.addEventListener("activate", event => {
     event.waitUntil(
@@ -31,12 +29,10 @@ self.addEventListener("activate", event => {
     );
     self.clients.claim();
 });
-
 // Fetch — Network-first untuk HTML, Cache-first untuk asset lain
 self.addEventListener("fetch", event => {
     const req = event.request;
     const url = new URL(req.url);
-
     // Untuk navigasi (index.html, dokumen) → network dulu, fallback ke cache
     if (req.mode === "navigate" || req.destination === "document" || url.pathname.endsWith(".html")) {
         event.respondWith(
@@ -51,7 +47,6 @@ self.addEventListener("fetch", event => {
         );
         return;
     }
-
     // Asset statis (icon, manifest, dll) → cache dulu, fallback network, lalu update cache di background
     event.respondWith(
         caches.match(req).then(cached => {
@@ -66,7 +61,6 @@ self.addEventListener("fetch", event => {
         })
     );
 });
-
 // Listener untuk pesan dari client (misal trigger skipWaiting manual)
 self.addEventListener("message", event => {
     if (event.data && event.data.type === "SKIP_WAITING") {
